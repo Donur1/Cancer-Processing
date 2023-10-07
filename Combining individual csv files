@@ -1,0 +1,80 @@
+import os
+import pandas as pd
+import numpy as np
+
+
+
+############Combine individual csv files to a single csv file
+
+folder_path = "/Users/omodo/PycharmProjects/pythonProject/Fall 2023 Research/Liver_CSV"
+
+
+tumor_data = pd.DataFrame()
+normal_data = pd.DataFrame()
+
+
+for filename in os.listdir(folder_path):
+    if filename.endswith("_tumor.csv"):
+        # Read and append tumor data
+        tumor_data = tumor_data.append(pd.read_csv(os.path.join(folder_path, filename)), ignore_index=True)
+    elif filename.endswith("_normal.csv"):
+        # Read and append normal data
+        normal_data = normal_data.append(pd.read_csv(os.path.join(folder_path, filename)), ignore_index=True)
+
+
+tumor_data.to_csv('Liver_Tumor.csv', index=False)
+normal_data.to_csv('Liver_Normal.csv', index=False)
+
+#################Obtain Refrence sequence(Repeat for Tumor)
+
+normal = pd.read_csv("Ovarian_Normal.csv", sep= ',')
+
+for i in range(len(normal)):
+     if  (normal.loc[i,'ref_seq'] == normal.loc[i, 'var_seq1']):
+         normal.at[i,'alt_seq'] = normal.loc[i,'var_seq2']
+
+     elif (normal.loc[i,'ref_seq'] == normal.loc[i,'var_seq2']):
+          normal.at[i,'alt_seq'] = normal.loc[i,'var_seq1']
+     else:
+          normal.at[i,'alt_seq'] = ''
+normal.to_csv('Liver_Normal_Extended.csv', index=False)
+
+
+
+
+
+
+
+############Code for obtaining count of transcript per variant  #############
+normal = pd.read_csv("Ovarian_Normal.csv", sep= ',')
+tumor = pd.read_csv("Ovarian_Tumor.csv", sep= ',')
+
+#normal['SYMBOL'] = normal['SYMBOL'].apply(lambda x: x.split(','))
+tumor['SYMBOL'] = tumor['SYMBOL'].apply(lambda x: x.split(','))
+
+
+#normal['Symbol_Length'] = normal['SYMBOL'].apply(len)
+tumor['Symbol_Length'] = tumor['SYMBOL'].apply(len)
+
+#normal.to_csv("Ovarian_Normal.csv", sep=',')
+tumor.to_csv("Ovarian_Tumor.csv", sep =',')
+
+
+####################New column for extracting PROVEAN data
+
+normal = pd.read_csv("Ovarian_Normal_Extended_Test.csv", sep= ',')
+
+normal[['numerator_amino', 'denominator_amino']] = normal['Amino_acids'].str.split('/', expand=True)
+normal[['numerator_position', 'denominator_position']] = normal['Protein_position'].str.split('/', expand=True)
+normal['provean'] = normal['numerator_amino']+normal['numerator_position']+normal['denominator_amino']
+tumor = pd.read_csv("Ovarian_Tumor_Extended_Test.csv", sep= ',')
+
+###Repeat for Tumor
+
+################Split the fraction to get the numerator and demominator
+
+tumor[['numerator_amino', 'denominator_amino']] = tumor['Amino_acids'].str.split('/', expand=True)
+tumor[['numerator_position', 'denominator_position']] = tumor['Protein_position'].str.split('/', expand=True)
+tumor['provean'] = tumor['numerator_amino']+tumor['numerator_position'].str.strip()+tumor['denominator_amino']
+
+tumor.to_csv("Ovarian_Tumor_Extended_Test.csv", sep =',')
