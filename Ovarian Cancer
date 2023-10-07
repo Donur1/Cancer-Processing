@@ -1,0 +1,70 @@
+import pandas as pd
+# #
+
+
+##############Remove nonimportant column##################
+normal = pd.read_csv("Ovarian_Normal_Testrun.csv", sep= ',',low_memory =False)
+tumor = pd.read_csv("Ovarian_Tumor_Testrun.csv", sep= ',',low_memory =False)
+allele_index = normal.columns.get_loc("Allele")
+normal = normal.iloc[:, :allele_index + 1]
+normal.to_csv('Ovarian_Tumor.csv', index=False)
+#
+
+# #################Obtain Refrence sequence
+
+for i in range(len(normal)):
+       if  (normal.loc[i,'ref_seq'] == normal.loc[i, 'var_seq1']):
+           normal.at[i,'alt_seq'] = normal.loc[i,'var_seq2']
+#
+       elif (normal.loc[i,'ref_seq'] == normal.loc[i,'var_seq2']):
+            normal.at[i,'alt_seq'] = normal.loc[i,'var_seq1']
+       else:
+            normal.at[i,'alt_seq'] = ''
+#
+normal.to_csv('Ovarian_Normal.csv', index=False)
+
+
+
+# ###########################Remove duplicate patient variants ################################
+
+columns_to_check_duplicates = ['chrom', 'left', 'var_seq1', 'var_seq2', 'Patient_ID']
+normal = normal.drop_duplicates(subset=columns_to_check_duplicates)
+normal.to_csv('Ovarian_Tumor.csv', index=False)
+
+
+###########################Group By V###################
+
+normal = normal.groupby(['chrom', 'left', 'ref_seq', 'alt_seq'], as_index=False).agg(list)
+normal.to_csv('Ovarian_Normal_Testrun.csv', index=False)
+
+
+
+###################Count #N #T
+normal['normal_count'] = normal['Patient_ID'].apply(lambda x: len(x))
+normal['#N'] = normal['normal_count']/(16)
+normal.to_csv('Ovarian_Normal_Testrun.csv', index=False
+
+####### Merge tumor and normal dataframe ############3
+merged = pd.merge(tumor, normal, on=['chrom', 'left', 'ref_seq', 'alt_seq'], how='outer')
+merged.to_csv('Ovarian_Combined.csv', index=False)
+
+
+#########################Obtain unique count of normal and tumor
+
+count_unique_normal = len(tumor[~tumor.isin(normal)].dropna())
+
+# Find the count of unique rows in df2
+count_unique_tumor = len(normal[~normal.isin(tumor)].dropna())
+
+# Find the count of common rows in the merged DataFrame
+count_common= len(merged.drop_duplicates())
+
+# Display the counts
+print("Count of unique rows in normal", count_unique_df1)
+print("Count of unique rows in tumor", count_unique_df2)
+print("Count of common rows:", count_common)
+
+
+
+
+
