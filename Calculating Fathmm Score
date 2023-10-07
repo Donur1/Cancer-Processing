@@ -1,0 +1,14 @@
+# ######## OBTAIN FATHMM TXT FILE
+#
+normal = pd.read_csv("Ovarian_Normal.csv", sep= ',')
+
+normal['numeric_chrom'] = normal['chrom'].str.extract('(\d+|[XY])')
+
+def generate_txt(normal,output_file):
+     with open("Ovarian_Normal_Fathmm.txt", "w") as txt_file:
+          for index, row in normal.iterrows():
+               txt_file.write(f"{row['numeric_chrom']},{row['left']},{row['ref_seq']},{row['alt_seq']}\n")
+
+
+generate_txt(normal,output_file= "Ovarian_Normal_Fathmm.txt")
+
