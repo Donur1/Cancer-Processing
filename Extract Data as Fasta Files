@@ -1,0 +1,59 @@
+import pandas as pd
+
+#########################  Extract Fasta Files from dataframe
+normal = pd.read_csv("Unique_Sequence-07-13.csv", sep = ',')
+
+def save_as_fasta(dataframe, file_path):
+     with open(file_path, 'w') as file:
+         for _, row in dataframe.iterrows():
+             genename = row['genename']
+             sequence = row['sequence']
+             length = row['length']
+
+             if pd.notnull(genename) and pd.notnull(sequence) and pd.notnull(length):
+                file.write(f'>{genename}|Length={length}\n')
+                file.write(f'{sequence}\n')
+     print(f"FASTA file saved successfully at: {file_path}")
+save_as_fasta(normal, 'output.fasta')
+
+
+########Code to compare Column##########################
+
+def compare_gene_names(df1, df2):
+    gene_names_normal= set(normal['genename'])
+    gene_names_normal2 = set(normal2['genename'])
+
+    genes_only_in_normal = gene_names_normal- gene_names_normal2
+    genes_only_in_normal2 = gene_names_normal2 - gene_names_normal
+
+    genes_not_in_both = list(genes_only_in_normal.union(genes_only_in_normal2))
+
+    return genes_not_in_both
+
+normal = pd.read_csv("Final_Sequence-07-05.csv", sep = ',')
+normal2 =pd.read_csv("SNV_gene_distribution.csv", sep = ',')
+
+genes_not_in_both = compare_gene_names(normal, normal2)
+
+print("Gene names not present in both DataFrames:")
+print(genes_not_in_both)
+
+
+
+############# Extract specific columns
+def first_8_columns(input_file_path, output_file_path):
+    #Read the input dataframe
+    df = pd.read_csv(input_file_path)
+
+#     # Select the first 8 columns
+    first_8_columns_df = df.iloc[:, :8]
+
+#     # Save the new dataframe to a new file
+    first_8_columns_df.to_csv(output_file_path, index=False)
+#
+#
+if __name__ == "__main__":
+    input_file_name = "AML_Variants.csv"
+    output_file_name = "Test_AML_Variants.csv"
+
+first_8_columns(input_file_name, output_file_name)
