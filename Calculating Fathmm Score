@@ -12,3 +12,16 @@ def generate_txt(normal,output_file):
 
 generate_txt(normal,output_file= "Ovarian_Normal_Fathmm.txt")
 
+
+####### Merge fathmm score on existing document 
+Fathmm_normal = pd.read_csv("Ovarian_Normal_FathmmResult.txt", sep='\t')
+
+merged = pd.read_csv("Ovarian_Combined.csv", sep= ',', low_memory=False)
+
+merged['Position'] = merged['Position'].astype(str)
+Fathmm_normal['Position'] = Fathmm_normal['Position'].astype(str)
+#
+result = pd.merge(merged, Fathmm_normal, how="left", on=["Position", 'Ref. Base', 'Mutant Base'])
+
+
+
